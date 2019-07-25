@@ -31,6 +31,7 @@ import (
 	"github.com/influxdata/kapacitor/services/pagerduty"
 	"github.com/influxdata/kapacitor/services/pagerduty2"
 	"github.com/influxdata/kapacitor/services/pushover"
+	"github.com/influxdata/kapacitor/services/redis"
 	"github.com/influxdata/kapacitor/services/sensu"
 	"github.com/influxdata/kapacitor/services/sideload"
 	"github.com/influxdata/kapacitor/services/slack"
@@ -170,6 +171,9 @@ type TaskMaster struct {
 	KafkaService interface {
 		Handler(kafka.HandlerConfig, ...keyvalue.T) (alert.Handler, error)
 	}
+	RedisService interface {
+		Handler(redis.HandlerConfig, ...keyvalue.T) (alert.Handler, error)
+	}
 	AlertaService interface {
 		DefaultHandlerConfig() alerta.HandlerConfig
 		Handler(alerta.HandlerConfig, ...keyvalue.T) (alert.Handler, error)
@@ -290,6 +294,7 @@ func (tm *TaskMaster) New(id string) *TaskMaster {
 	n.K8sService = tm.K8sService
 	n.Commander = tm.Commander
 	n.SideloadService = tm.SideloadService
+	n.RedisService = tm.RedisService
 	return n
 }
 

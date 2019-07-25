@@ -26,6 +26,7 @@ import (
 	"github.com/influxdata/kapacitor/services/pagerduty"
 	"github.com/influxdata/kapacitor/services/pagerduty2"
 	"github.com/influxdata/kapacitor/services/pushover"
+	"github.com/influxdata/kapacitor/services/redis"
 	"github.com/influxdata/kapacitor/services/sensu"
 	"github.com/influxdata/kapacitor/services/slack"
 	"github.com/influxdata/kapacitor/services/smtp"
@@ -341,6 +342,17 @@ func newAlertNode(et *ExecutingTask, n *pipeline.AlertNode, d NodeDiagnostic) (a
 		h, err := et.tm.KafkaService.Handler(c, ctx...)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to create kafka handler")
+		}
+		an.handlers = append(an.handlers, h)
+	}
+
+	for _, r := range n.RedisHandlers {
+		c := redis.HandlerConfig{
+			Queue: r.Queue,
+		}
+		h, err := et.tm.RedisService.Handler(c, ctx...)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to create redis handler")
 		}
 		an.handlers = append(an.handlers, h)
 	}

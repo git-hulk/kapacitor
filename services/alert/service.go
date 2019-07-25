@@ -24,6 +24,7 @@ import (
 	"github.com/influxdata/kapacitor/services/pagerduty"
 	"github.com/influxdata/kapacitor/services/pagerduty2"
 	"github.com/influxdata/kapacitor/services/pushover"
+	"github.com/influxdata/kapacitor/services/redis"
 	"github.com/influxdata/kapacitor/services/sensu"
 	"github.com/influxdata/kapacitor/services/slack"
 	"github.com/influxdata/kapacitor/services/smtp"
@@ -89,6 +90,9 @@ type Service struct {
 	}
 	KafkaService interface {
 		Handler(kafka.HandlerConfig, ...keyvalue.T) (alert.Handler, error)
+	}
+	RedisService interface {
+		Handler(redis.HandlerConfig, ...keyvalue.T) (alert.Handler, error)
 	}
 	MQTTService interface {
 		Handler(mqtt.HandlerConfig, ...keyvalue.T) alert.Handler
@@ -803,6 +807,17 @@ func (s *Service) createHandlerFromSpec(spec HandlerSpec) (handler, error) {
 			return handler{}, err
 		}
 		h, err = s.KafkaService.Handler(c, ctx...)
+		if err != nil {
+			return handler{}, err
+		}
+		h = newExternalHandler(h)
+	case "redis":
+		c := redis.HandlerConfig{}
+		err := decodeOptions(spec.Options, &c)
+		if err != nil {
+			return handler{}, err
+		}
+		h, err = s.RedisService.Handler(c, ctx...)
 		if err != nil {
 			return handler{}, err
 		}

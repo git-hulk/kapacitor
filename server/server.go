@@ -49,6 +49,7 @@ import (
 	"github.com/influxdata/kapacitor/services/pagerduty"
 	"github.com/influxdata/kapacitor/services/pagerduty2"
 	"github.com/influxdata/kapacitor/services/pushover"
+	"github.com/influxdata/kapacitor/services/redis"
 	"github.com/influxdata/kapacitor/services/replay"
 	"github.com/influxdata/kapacitor/services/reporting"
 	"github.com/influxdata/kapacitor/services/scraper"
@@ -241,6 +242,7 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 	// Append Alert integration services
 	s.appendAlertaService()
 	s.appendHipChatService()
+	s.appendRedisService()
 	s.appendKafkaService()
 	if err := s.appendMQTTService(); err != nil {
 		return nil, errors.Wrap(err, "mqtt service")
@@ -742,6 +744,18 @@ func (s *Server) appendHipChatService() {
 
 	s.SetDynamicService("hipchat", srv)
 	s.AppendService("hipchat", srv)
+}
+
+func (s *Server) appendRedisService() {
+	c := s.config.Redis
+	d := s.DiagService.NewRedisHandler()
+	srv := redis.NewService(c, d)
+
+	s.TaskMaster.RedisService = srv
+	s.AlertService.RedisService = srv
+
+	s.SetDynamicService("redis", srv)
+	s.AppendService("redis", srv)
 }
 
 func (s *Server) appendKafkaService() {

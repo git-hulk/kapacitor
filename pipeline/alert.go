@@ -385,6 +385,9 @@ type AlertNodeData struct {
 	// Send alert to Kafka topic
 	// tick:ignore
 	KafkaHandlers []*KafkaHandler `tick:"Kafka" json:"kafka"`
+	// Send alert to Redis queue
+	// tick:ignore
+	RedisHandlers []*RedisHandler `tick:"Redis" json:"redis"`
 }
 
 func newAlertNode(wants EdgeType) *AlertNode {
@@ -1957,4 +1960,33 @@ type KafkaHandler struct {
 	// Template used to construct the message body
 	// If empty the alert data in JSON is sent as the message body.
 	Template string `json:"template"`
+}
+
+// Send alert to redis queue
+//
+// Example:
+//		[redis]
+//			enabled = true
+//			addr = "127.0.0.1:6379"
+//			password = "foobared"
+//			queue = "_default_alert_queue_"
+//			db = 0
+//
+// Example:
+//    stream
+//         |alert()
+//             .redis()
+//                 .queue('test_queue')
+
+func (n *AlertNodeData) Redis() *RedisHandler {
+	r := &RedisHandler{
+		AlertNodeData: n,
+	}
+	n.RedisHandlers = append(n.RedisHandlers, r)
+	return r
+}
+
+type RedisHandler struct {
+	*AlertNodeData `json:"-"`
+	Queue          string `json:"queue"`
 }

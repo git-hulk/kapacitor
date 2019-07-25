@@ -202,6 +202,12 @@ func (s *Service) NewKafkaHandler() *KafkaHandler {
 	}
 }
 
+func (s *Service) NewRedisHandler() *RedisHandler {
+	return &RedisHandler{
+		l: s.Logger.With(String("service", "redis")),
+	}
+}
+
 func (s *Service) NewPagerDutyHandler() *PagerDutyHandler {
 	return &PagerDutyHandler{
 		l: s.Logger.With(String("service", "pagerduty")),

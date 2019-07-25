@@ -38,6 +38,7 @@ import (
 	"github.com/influxdata/kapacitor/services/pagerduty"
 	"github.com/influxdata/kapacitor/services/pagerduty2"
 	"github.com/influxdata/kapacitor/services/pushover"
+	"github.com/influxdata/kapacitor/services/redis"
 	"github.com/influxdata/kapacitor/services/replay"
 	"github.com/influxdata/kapacitor/services/reporting"
 	"github.com/influxdata/kapacitor/services/scraper"
@@ -102,6 +103,7 @@ type Config struct {
 	Talk       talk.Config       `toml:"talk" override:"talk"`
 	Telegram   telegram.Config   `toml:"telegram" override:"telegram"`
 	VictorOps  victorops.Config  `toml:"victorops" override:"victorops"`
+	Redis      redis.Config      `toml:"redis" override:"redis"`
 
 	// Discovery for scraping
 	Scraper         []scraper.Config          `toml:"scraper" override:"scraper,element-key=name"`
@@ -171,6 +173,7 @@ func NewConfig() *Config {
 	c.SNMPTrap = snmptrap.NewConfig()
 	c.Telegram = telegram.NewConfig()
 	c.VictorOps = victorops.NewConfig()
+	c.Redis = redis.NewConfig()
 
 	c.Reporting = reporting.NewConfig()
 	c.Stats = stats.NewConfig()
@@ -319,6 +322,9 @@ func (c *Config) Validate() error {
 	}
 	if err := c.VictorOps.Validate(); err != nil {
 		return errors.Wrap(err, "victorops")
+	}
+	if err := c.Redis.Validate(); err != nil {
+		return errors.Wrap(err, "redis")
 	}
 
 	if err := c.UDF.Validate(); err != nil {

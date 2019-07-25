@@ -29,6 +29,7 @@ import (
 	"github.com/influxdata/kapacitor/services/pagerduty"
 	"github.com/influxdata/kapacitor/services/pagerduty2"
 	"github.com/influxdata/kapacitor/services/pushover"
+	"github.com/influxdata/kapacitor/services/redis"
 	"github.com/influxdata/kapacitor/services/sensu"
 	"github.com/influxdata/kapacitor/services/sideload"
 	"github.com/influxdata/kapacitor/services/slack"
@@ -407,6 +408,22 @@ func (h *HipChatHandler) WithContext(ctx ...keyvalue.T) hipchat.Diagnostic {
 }
 
 func (h *HipChatHandler) Error(msg string, err error) {
+	h.l.Error(msg, Error(err))
+}
+
+type RedisHandler struct {
+	l Logger
+}
+
+func (h *RedisHandler) WithContext(ctx ...keyvalue.T) redis.Diagnostic {
+	fields := logFieldsFromContext(ctx)
+
+	return &RedisHandler{
+		l: h.l.With(fields...),
+	}
+}
+
+func (h *RedisHandler) Error(msg string, err error) {
 	h.l.Error(msg, Error(err))
 }
 

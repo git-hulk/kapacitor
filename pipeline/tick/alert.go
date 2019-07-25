@@ -186,6 +186,11 @@ func (n *AlertNode) Build(a *pipeline.AlertNode) (ast.Node, error) {
 			Dot("template", h.Template)
 	}
 
+	for _, h := range a.RedisHandlers {
+		n.Dot("redis").
+			Dot("queue", h.Queue)
+	}
+
 	for _, h := range a.AlertaHandlers {
 		n.Dot("alerta").
 			Dot("token", h.Token).
